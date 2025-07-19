@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import mysql.connector
+import pandas as pd
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,23 +17,21 @@ cursor = conn.cursor()
 
 st.title("Sistema de Programação de Filmes")
 
-# Seletor de tabela
 tabelas = ["Filme", "Canal", "Exibicao", "Elenco"]
 tabela = st.selectbox("Escolha a tabela:", tabelas)
 
-# Mostrar dados da tabela
 if st.button(f"Visualizar {tabela}"):
     cursor.execute(f"SELECT * FROM {tabela}")
     dados = cursor.fetchall()
     colunas = [i[0] for i in cursor.description]
+    df = pd.DataFrame(dados, columns=colunas)
+    
     st.subheader(f"Dados da tabela {tabela}")
-    st.dataframe(dados, use_container_width=True)
+    st.dataframe(df, use_container_width=True)
 
-# CRUD Dinâmico
 st.divider()
 st.subheader(f"CRUD - {tabela}")
 
-# CRUD para Tabela Filme
 if tabela == "Filme":
     aba = st.radio("Escolha a ação:", ["Inserir", "Atualizar", "Excluir"])
     
@@ -73,7 +72,6 @@ if tabela == "Filme":
                 conn.commit()
                 st.success("Filme excluído com sucesso!")
 
-# CRUD para Tabela Canal
 elif tabela == "Canal":
     aba = st.radio("Escolha a ação:", ["Inserir", "Atualizar", "Excluir"])
     
@@ -103,7 +101,6 @@ elif tabela == "Canal":
                 conn.commit()
                 st.success("Canal excluído com sucesso!")
 
-# CRUD para Tabela Elenco
 elif tabela == "Elenco":
     aba = st.radio("Escolha a ação:", ["Inserir", "Atualizar", "Excluir"])
     
@@ -141,7 +138,6 @@ elif tabela == "Elenco":
                 conn.commit()
                 st.success("Registro excluído do elenco!")
 
-# CRUD para Tabela Exibicao
 elif tabela == "Exibicao":
     aba = st.radio("Escolha a ação:", ["Inserir", "Excluir"])
 
@@ -200,10 +196,6 @@ if st.button("Criar trigger chk_exibicao_no_overlap"):
     except mysql.connector.Error as e:
         st.error(f"Erro ao criar trigger: {e}")
 
-
-
-
-# Fechando a conexão
 cursor.close()
 conn.close()
 
