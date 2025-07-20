@@ -20,9 +20,9 @@ CREATE TABLE Exibicao (
     num_canal INT NOT NULL,
     data_exibicao DATE,
     hora_exibicao TIME,
-    FOREIGN KEY (num_filme) REFERENCES Filme(num_filme) ,
-    FOREIGN KEY (num_canal) REFERENCES Canal(num_canal) ON UPDATE CASCADE,
-    UNIQUE KEY (num_filme, num_canal, data_exibicao, hora_exibicao)
+    FOREIGN KEY (num_filme) REFERENCES Filme(num_filme) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (num_canal) REFERENCES Canal(num_canal) ON UPDATE CASCADE ON DELETE CASCADE,
+    UNIQUE KEY (num_filme, num_canal, data_exibicao, hora_exibicao) 
 );
 
 CREATE TABLE Elenco(
@@ -30,13 +30,11 @@ CREATE TABLE Elenco(
     num_filme INT NOT NULL,
     nome_ator VARCHAR(255),
     protagonista BOOLEAN,
-    FOREIGN KEY (num_filme) REFERENCES Filme(num_filme)
+    FOREIGN KEY (num_filme) REFERENCES Filme(num_filme) ON UPDATE CASCADE
 );
 
 
 -- PROGRAMAÇÃO DE FILMES -- 
-
-
 -- Inserção dos dados na tabela Canal
 INSERT INTO Canal (num_canal, nome) VALUES
 (111, 'AXN'),
@@ -52,7 +50,6 @@ INSERT INTO Filme (num_filme, nome, ano, duracao) VALUES
 (90004, 'Vingadores Ultimato', 2019, 180),
 (90005, 'Lilo & Stitch', 2025, 108);
 
--- Inserção dos dados na tabela Exibicao
 INSERT INTO Exibicao (num_filme, num_canal, data_exibicao, hora_exibicao) VALUES
 (90001, 222, '2025-06-27', '14:00:00'),
 (90002, 111, '2025-06-27', '19:45:00'),
