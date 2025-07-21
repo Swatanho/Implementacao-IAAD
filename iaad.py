@@ -7,9 +7,9 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 conn = mysql.connector.connect(
     host="localhost",
-    port="3306",
-    user="root",
-    password="Bilombra250!",
+    port="",
+    user="",
+    password="",
     database="programaçõesdefilmes"
 )
 
@@ -138,6 +138,7 @@ elif tabela == "Elenco":
                 conn.commit()
                 st.success("Registro excluído do elenco!")
 
+# CRUD para Tabela Exibicao
 elif tabela == "Exibicao":
     aba = st.radio("Escolha a ação:", ["Inserir", "Excluir"])
 
@@ -166,10 +167,44 @@ elif tabela == "Exibicao":
                 conn.commit()
                 st.success("Exibição excluída!")
 
-# criação de trigger para impedir que haja conflito de horários de exibição
+# Seção 2: Relatórios Especiais
+st.header("Relatórios Especiais")
 
-st.header("Criar trigger: impedir conflito de horário em Exibicao")
+# Coatores por Filme
+st.subheader("Coatores por Filme")
+if st.button("Ver pares de co‑atores"):
+    df = pd.read_sql("""
+        SELECT DISTINCT e1.num_filme, e1.nome_ator AS ator1, e2.nome_ator AS ator2
+        FROM Elenco e1
+        JOIN Elenco e2
+          ON e1.num_filme = e2.num_filme
+          AND e1.nome_ator < e2.nome_ator
+        ORDER BY e1.num_filme, ator1, ator2
+    """, conn)
+    st.dataframe(df)
 
+# Filmes com Maior e Menor Duração
+st.subheader("Filmes com Maior e Menor Duração")
+if st.button("Filmes extremos"):
+    df = pd.read_sql("""
+        SELECT nome AS filme_mais_extremo, duracao,
+        CASE
+          WHEN duracao = (SELECT MAX(duracao) FROM Filme) THEN 'maior'
+          WHEN duracao = (SELECT MIN(duracao) FROM Filme) THEN 'menor'
+        END AS tipo
+        FROM Filme
+        WHERE duracao IN (
+          (SELECT MAX(duracao) FROM Filme),
+          (SELECT MIN(duracao) FROM Filme)
+        )
+    """, conn)
+    st.dataframe(df)
+
+# Seção 3: Gerenciamento de Triggers
+st.header("Gerenciamento de Triggers")
+
+# Trigger para impedir conflito de horários
+st.subheader("Criar trigger: impedir conflito de horário em Exibicao")
 if st.button("Criar trigger chk_exibicao_no_overlap"):
     try:
         cursor.execute("DROP TRIGGER IF EXISTS chk_exibicao_no_overlap")
@@ -196,6 +231,6 @@ if st.button("Criar trigger chk_exibicao_no_overlap"):
     except mysql.connector.Error as e:
         st.error(f"Erro ao criar trigger: {e}")
 
+# Fechando a conexão
 cursor.close()
 conn.close()
-
