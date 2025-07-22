@@ -7,15 +7,17 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 conn = mysql.connector.connect(
     host="localhost",
-    port="",
-    user="",
-    password="",
+    port="3306",
+    user="root",
+    password="Bilombra250!",
     database="programaçõesdefilmes"
 )
 
 cursor = conn.cursor()
 
 st.title("Sistema de Programação de Filmes")
+
+# VISUALIZAÇÃO DAS TABELAS
 
 tabelas = ["Filme", "Canal", "Exibicao", "Elenco"]
 tabela = st.selectbox("Escolha a tabela:", tabelas)
@@ -26,9 +28,15 @@ if st.button(f"Visualizar {tabela}"):
     colunas = [i[0] for i in cursor.description]
     df = pd.DataFrame(dados, columns=colunas)
     
+    if tabela == "Exibicao" and 'hora_exibicao' in df.columns:
+        df['hora_exibicao'] = df['hora_exibicao'].apply(
+            lambda x: str(x).split()[-1] if pd.notnull(x) else x
+        )
+    
     st.subheader(f"Dados da tabela {tabela}")
     st.dataframe(df, use_container_width=True)
 
+# CRUD TABELA FILME
 st.divider()
 st.subheader(f"CRUD - {tabela}")
 
@@ -167,8 +175,8 @@ elif tabela == "Exibicao":
                 conn.commit()
                 st.success("Exibição excluída!")
 
-# Seção 2: Relatórios Especiais
-st.header("Relatórios Especiais")
+# Seção 2: Relatórios extras
+st.header("Relatórios Extras")
 
 # Coatores por Filme
 st.subheader("Coatores por Filme")
